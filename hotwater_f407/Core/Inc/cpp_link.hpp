@@ -12,9 +12,9 @@
     	extern "C"
     	{
     #endif
-    	void cpp_init			(void);
-    	void classBoardLed_toggleGreen 	(void);
-    	void classBoardLed_toggleRed 	(void);
+    	void cpp_init	(void);
+
+
     #ifdef __cplusplus
     	}
     #endif

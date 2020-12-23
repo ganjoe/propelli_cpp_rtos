@@ -26,11 +26,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cpp_link.hpp"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
-typedef StaticTask_t osStaticThreadDef_t;
 /* USER CODE BEGIN PTD */
 
 /* USER CODE END PTD */
@@ -56,30 +55,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4
 };
-/* Definitions for BoardLedRed */
-osThreadId_t BoardLedRedHandle;
-uint32_t BoardLedRedBuffer[ 128 ];
-osStaticThreadDef_t BoardLedRedControlBlock;
-const osThreadAttr_t BoardLedRed_attributes = {
-  .name = "BoardLedRed",
-  .stack_mem = &BoardLedRedBuffer[0],
-  .stack_size = sizeof(BoardLedRedBuffer),
-  .cb_mem = &BoardLedRedControlBlock,
-  .cb_size = sizeof(BoardLedRedControlBlock),
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for BoardLedGreen */
-osThreadId_t BoardLedGreenHandle;
-uint32_t BoardLedGreenBuffer[ 128 ];
-osStaticThreadDef_t BoardLedGreenControlBlock;
-const osThreadAttr_t BoardLedGreen_attributes = {
-  .name = "BoardLedGreen",
-  .stack_mem = &BoardLedGreenBuffer[0],
-  .stack_size = sizeof(BoardLedGreenBuffer),
-  .cb_mem = &BoardLedGreenControlBlock,
-  .cb_size = sizeof(BoardLedGreenControlBlock),
-  .priority = (osPriority_t) osPriorityLow,
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -87,8 +62,6 @@ const osThreadAttr_t BoardLedGreen_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-void StartBoardLedRed(void *argument);
-void StartBoardLedGreen(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -122,12 +95,6 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of BoardLedRed */
-  BoardLedRedHandle = osThreadNew(StartBoardLedRed, NULL, &BoardLedRed_attributes);
-
-  /* creation of BoardLedGreen */
-  BoardLedGreenHandle = osThreadNew(StartBoardLedGreen, NULL, &BoardLedGreen_attributes);
-
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -154,42 +121,6 @@ void StartDefaultTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
-}
-
-/* USER CODE BEGIN Header_StartBoardLedRed */
-/**
-* @brief Function implementing the BoardLedRed thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartBoardLedRed */
-void StartBoardLedRed(void *argument)
-{
-  /* USER CODE BEGIN StartBoardLedRed */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartBoardLedRed */
-}
-
-/* USER CODE BEGIN Header_StartBoardLedGreen */
-/**
-* @brief Function implementing the BoardLedGreen thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartBoardLedGreen */
-void StartBoardLedGreen(void *argument)
-{
-  /* USER CODE BEGIN StartBoardLedGreen */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartBoardLedGreen */
 }
 
 /* Private application code --------------------------------------------------*/

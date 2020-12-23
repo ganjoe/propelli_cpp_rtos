@@ -7,17 +7,18 @@
 #include "cpp_link.hpp"
 #include "mcp23017.hpp"
 #include "BoardLed.hpp"
+#include "TutorialClass.hpp"
+
 
     #ifdef __cplusplus
     	extern "C"
     	{
     #endif
-    	void cpp_init			(void)
+    	void cpp_init(void)
     	    {
-
+    	    mfBoardLed.start("BlinkGreen", 1200, 1);
     	    }
-    	void classBoardLed_toggleGreen 	(void) 	{classBoardLed.toggleGreen();}
-    	void classBoardLed_toggleRed 	(void) 	{classBoardLed.toggleRed();}
+
     #ifdef __cplusplus
     	}
     #endif
