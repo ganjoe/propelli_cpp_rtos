@@ -5,11 +5,11 @@
  *      Author: danie
  */
 
-#ifndef TUTORIALCLASS_HPP_
-#define TUTORIALCLASS_HPP_
+#ifndef CPP_TASKLINK_HPP_
+#define CPP_TASKLINK_HPP_
 #include "main.h"
 #include "cmsis_os.h"
-#include "BoardLed.hpp"
+
 
 class ClassTaskCreate
     {
@@ -62,7 +62,7 @@ private:
     bool stopCalled = false;
     TaskHandle_t xHandle = 0;
     };
-
+/*
 class MFBoardLed: public ClassTaskCreate
     {
 private:
@@ -74,5 +74,5 @@ private:
 
     };
 extern MFBoardLed mfBoardLed;
-
-#endif /* TUTORIALCLASS_HPP_ */
+*/
+#endif /* CPP_TASKLINK_HPP_ */
