@@ -9,6 +9,7 @@
 #define INC_MCP23017_HPP_
 #include "main.h"
 #include "i2c.h"
+#include "cpp_TaskLink.hpp"
 
 typedef enum
     {
@@ -25,19 +26,19 @@ MCP_PINMODE;
 #define REGISTER_OLATA		0x14
 #define MCP23017_PORTA		0x00
 
-class CLASS_MCP
+class ClassMcp
     {
 public:
     uint16_t addr;
     uint16_t pullups, direction, outlatch, inputstate;
-    I2C_HandleTypeDef hi2c;
-    CLASS_MCP(uint16_t i2caddr, I2C_HandleTypeDef* hi2c);
+    I2C_HandleTypeDef* hi2c;
+
     //modflag /rtos - init
+    void init(uint16_t i2caddr, I2C_HandleTypeDef* hi2c);
     // interface
     void WritePin(uint8_t pinnr, int state);
     void PinMode(MCP_PINMODE pinmode, uint8_t pinnr);
     bool ReadPin(uint8_t pinnr);
-
     void ToggPin(uint8_t pinnr);
     void set_all_input();
     void WriteWord(uint16_t word);
@@ -52,5 +53,21 @@ private:
     void lolReadByte(uint8_t regaddr, uint8_t *data);
 
     };
+extern ClassMcp mcp;
+
+class TaskMcp: public ClassTaskCreate
+    {
+public:
+
+	void setup() override
+	    {
+	    mcp.init(0x20, &hi2c1);
+	    }
+	void loop() override
+	    {
+	    osDelay(200);
+	    }
+};
+extern TaskMcp taskMcp;
 
 #endif /* INC_MCP23017_HPP_ */

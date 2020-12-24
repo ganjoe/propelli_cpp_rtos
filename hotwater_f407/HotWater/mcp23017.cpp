@@ -9,22 +9,22 @@
 
 #include "utils.h"
 
-void CLASS_MCP::WritePin(uint8_t pinnr, int state)
+void ClassMcp::WritePin(uint8_t pinnr, int state)
     {
     utils_set_bit_in_Word(&outlatch, pinnr, (bool) state);
     }
 
-void CLASS_MCP::ToggPin(uint8_t pinnr)
+void ClassMcp::ToggPin(uint8_t pinnr)
     {
     utils_togg_bit_in_Word(&outlatch, pinnr);
     }
 
-bool CLASS_MCP::ReadPin(uint8_t pinnr)
+bool ClassMcp::ReadPin(uint8_t pinnr)
     {
     return utils_get_bit_in_Word(&inputstate, pinnr);
     }
 
-void CLASS_MCP::PinMode(MCP_PINMODE pinmode, uint8_t pinnr)
+void ClassMcp::PinMode(MCP_PINMODE pinmode, uint8_t pinnr)
     {
     switch (pinmode)
 	{
@@ -61,14 +61,14 @@ void CLASS_MCP::PinMode(MCP_PINMODE pinmode, uint8_t pinnr)
 
     }
 
-void CLASS_MCP::WriteWord(uint16_t word)
+void ClassMcp::WriteWord(uint16_t word)
     {
     pullups = 0;
     direction = !word;
     outlatch = word;
     }
 
-void CLASS_MCP::lolWriteBuffer(uint16_t *buffer, uint16_t addr)
+void ClassMcp::lolWriteBuffer(uint16_t *buffer, uint16_t addr)
     {
     uint16_t dword = *buffer;
     uint8_t highByte = dword >> 8;
@@ -77,7 +77,7 @@ void CLASS_MCP::lolWriteBuffer(uint16_t *buffer, uint16_t addr)
     lolWriteByte(addr + 1, highByte);
     }
 
-void CLASS_MCP::lolReadBuffer(uint16_t *buffer, uint16_t addr)
+void ClassMcp::lolReadBuffer(uint16_t *buffer, uint16_t addr)
     {
     uint16_t dword;
     uint16_t *ptr = &dword;
@@ -90,7 +90,7 @@ void CLASS_MCP::lolReadBuffer(uint16_t *buffer, uint16_t addr)
     *buffer = *ptr;
     }
 
-void CLASS_MCP::lolWriteByte(uint16_t regaddr, uint8_t data)
+void ClassMcp::lolWriteByte(uint16_t regaddr, uint8_t data)
     {
     HAL_StatusTypeDef complete = HAL_ERROR;
     complete = HAL_I2C_Mem_Write(&hi2c1, addr, regaddr, 1, &data, 1,
@@ -101,7 +101,7 @@ void CLASS_MCP::lolWriteByte(uint16_t regaddr, uint8_t data)
 	}
     }
 
-void CLASS_MCP::lolReadByte(uint8_t regaddr, uint8_t *data)
+void ClassMcp::lolReadByte(uint8_t regaddr, uint8_t *data)
     {
     uint8_t localbuff;
 
@@ -120,3 +120,12 @@ void CLASS_MCP::lolReadByte(uint8_t regaddr, uint8_t *data)
 	//TODO:I2C ERROR
 	}
     }
+
+void ClassMcp::init(uint16_t i2caddr, I2C_HandleTypeDef* hi2c)
+    {
+    this->addr=i2caddr;
+    this->hi2c = hi2c;
+    }
+
+ClassMcp mcp;
+TaskMcp taskMcp;
