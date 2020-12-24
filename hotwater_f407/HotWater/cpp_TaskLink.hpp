@@ -62,17 +62,5 @@ private:
     bool stopCalled = false;
     TaskHandle_t xHandle = 0;
     };
-/*
-class MFBoardLed: public ClassTaskCreate
-    {
-private:
 
-    void loop() override
-	{
-	classBoardLed.toggleGreen();
-	}
-
-    };
-extern MFBoardLed mfBoardLed;
-*/
 #endif /* CPP_TASKLINK_HPP_ */

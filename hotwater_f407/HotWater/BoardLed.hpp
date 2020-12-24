@@ -10,23 +10,41 @@
 #define INC_BOARDLED_HPP_
 #include "cpp_TaskLink.hpp"
 
-class MFBoardLed: public ClassTaskCreate
+
+
+class ClassBoardLed
     {
+    public:
+    void toggleRed();
+    void toggleGreen();
+    };
+
+extern ClassBoardLed 	BoardLed;
+
+class TaskLedRed: public ClassTaskCreate
+    {
+
 public:
        void loop() override
 	{
-	toggleGreen();
+	BoardLed.toggleRed();
 	osDelay(200);
 	}
-    void toggleRed();
-    void toggleGreen();
-
-private:
-
 };
 
+class TaskLedGreen: public ClassTaskCreate
+    {
 
-extern MFBoardLed classBoardLed;
+public:
+       void loop() override
+	{
+	BoardLed.toggleGreen();
+	osDelay(500);
+	}
+};
+
+extern TaskLedRed	taskLedRed;
+extern TaskLedGreen 	taskLedGreen;
 
 
 

@@ -7,7 +7,7 @@
 #include "cpp_TaskLink.hpp"
 #include "cpp_link.hpp"
 #include "mcp23017.hpp"
-//#include "BoardLed.hpp"
+#include "BoardLed.hpp"
 
 
     #ifdef __cplusplus
@@ -16,7 +16,8 @@
     #endif
     	void cpp_init(void)
     	    {
-    	  //  mfBoardLed.start("BlinkGreen", 1200, 1);
+    	  taskLedGreen.start("BlinkGreen", 1200, 1);
+    	  taskLedRed.start("BlinkRed", 1200, 1);
     	    }
 
     #ifdef __cplusplus
