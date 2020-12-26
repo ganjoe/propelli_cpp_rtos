@@ -108,14 +108,15 @@ int main(void)
   MX_I2C2_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
+
   cpp_init();
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
   MX_FREERTOS_Init();
   /* Start scheduler */
-
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
