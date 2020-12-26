@@ -13,7 +13,12 @@
 #include "usart.h"
 #include "cpp_TaskLink.hpp"
 
-
+ enum
+{
+    PEEK,
+    POP,
+    PARSE,
+};
 
 class ClassCmdTerminal
     {
@@ -21,7 +26,7 @@ public:
 
    void init(uint32_t len, uint32_t size);
    void addKey(uint8_t pData);
-   void printQueue();
+   void printQueue(int mode);
    void loop();
 
 private:
@@ -38,7 +43,7 @@ class TaskCmd: public ClassTaskCreate
 public:
     void setup() override
 	{
-	Cmd.init(128, 1);
+	Cmd.init(256, 1);
 	}
     void loop() override
 	{
