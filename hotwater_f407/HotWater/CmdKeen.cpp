@@ -9,6 +9,7 @@
 #include "usart.h"
 #include "stdlib.h"
 #include "string.h"
+#include "stdarg.h"
 
 void ClassCmdTerminal::ReadQueue(int mode)
     {
@@ -74,8 +75,7 @@ void ClassCmdTerminal::ReadQueue(int mode)
 		if (parseCommand(peekBuffer) == CMD_VALID)
 		    {
 		    //valid command found
-		    HAL_UART_Transmit(&huart1, peekBuffer, var, 199);
-
+		   // pprint("[CMDKEEN][PARSE] valid Command %s",peekBuffer);
 		    //"[CMDKEEN][PARSE] valid Command %s", peekBuffer"
 		    }
 		//no further bytes are processed in queue
@@ -92,13 +92,44 @@ void ClassCmdTerminal::init(uint32_t len, uint32_t size)
     {
 
     CmdRxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )size);
-    RegisterCommand();
+    CmdTxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )size);
+     RegisterCommand();
+
     }
+
+void ClassCmdTerminal::term_lol_vprint(const char *fmt, va_list argp,  char* buffer)
+    {
+	HAL_StatusTypeDef stat;
+	int txlen;
+
+	if (0 < vsprintf(buffer, fmt, argp))
+	    {
+	    txlen = strlen(buffer);
+		for (int var = 0; var < txlen; ++var)
+		    {
+		    //wait 100ms at full queue to become available
+		   // xQueueSendToBack(CmdTxBufferHndl, &buffer[var], 0);
+		    }
+	    }
+
+    }
+
+void ClassCmdTerminal::pprint(const char *fmt, ...)
+       {
+    char buffer[32];
+    va_list argp;
+    va_start(argp, fmt);
+    term_lol_vprint(fmt, argp, buffer);
+    va_end(argp);
+
+       }
 
 void ClassCmdTerminal::loop()
     {
     ReadQueue(PARSE);
+    //SendQueue(int len);
     }
+
 
 void ClassCmdTerminal::addKeyIsr(uint8_t pData)
     {
@@ -118,7 +149,7 @@ void ClassCmdTerminal::addKeyIsr(uint8_t pData)
 
 void ClassCmdTerminal::RegisterCommand()
     {
-    /*	term_lol_setCallback("setword", "mcp regs A und B mit wort setzen",	"dword",	setword);
+   	/* term_lol_setCallback("setword", "mcp regs A und B mit wort setzen",	"dword",	setword);
      term_lol_setCallback("writepin", "pin, state",		"bits ab port a setzen",	writepin);
      term_lol_setCallback("readpin", "register lesen",	    "pinnr, pullupstate", 	readpin);
      term_lol_setCallback("setallin", "help",    "arghelp", 	setallin);
@@ -145,7 +176,7 @@ void ClassCmdTerminal::RegisterCommand()
      term_lol_setCallback("trange","Heizung Temperaturschwellen","lowlimit<float>_highlimit<float>", 	trange);
 
      term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
-     term_lol_setCallback("selhhw", 	"help",		"arghelp", 	selhhw); */
+    term_lol_setCallback("selhhw", 	"help",		"arghelp", 	selhhw);*/
     term_lol_setCallback("reset", "Backup und Reset", "kein Argument", reset);
     }
 

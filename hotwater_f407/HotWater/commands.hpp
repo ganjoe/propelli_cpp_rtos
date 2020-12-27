@@ -8,6 +8,12 @@
 #ifndef COMMANDS_HPP_
 #define COMMANDS_HPP_
 
+void RegisterCommand();
+void term_lol_setCallback(const char *command,
+			     const char *help,
+			     const char *arg_names,
+			     void (*cbf)(int argc, const char **argv));
+
 
 //	config
 void reset(int argc, const char **argv);

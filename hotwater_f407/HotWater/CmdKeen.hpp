@@ -12,6 +12,8 @@
 #include "queue.h"
 #include "usart.h"
 #include "cpp_TaskLink.hpp"
+#include "stdio.h"
+
 #include "commands.hpp"
 
 
@@ -33,8 +35,10 @@ enum
 #define CALLBACK_LEN 40
 #define CMD_MAXARG 4
 
+
  typedef struct
  	{
+
  	const char *command;
  	const char *help;
  	const char *arg_names;
@@ -49,23 +53,26 @@ class ClassCmdTerminal
     {
 public:
 
+
    void init(uint32_t len, uint32_t size);
    void addKeyIsr(uint8_t pData);
    void ReadQueue(int mode);
-   void RegisterCommand();
+  void RegisterCommand();
    int parseCommand(uint8_t* CmdStrin);
-
+   void SendQueue(int len);
+   void pprint(const char *fmt, ...);
 
    void loop();
    int newKey;
 
+   int callback_write;
+
 private:
 
-   QueueHandle_t CmdRxBufferHndl;
-   void term_lol_setCallback(const char *command,
-			     const char *help,
-			     const char *arg_names,
-			     void (*cbf)(int argc, const char **argv));
+   QueueHandle_t CmdRxBufferHndl, CmdTxBufferHndl;
+
+   void term_lol_vprint(const char *fmt, va_list argp,  char* buffer);
+  void term_lol_setCallback(const char *command,const char *help,const char *arg_names, void (*cbf)(int argc, const char **argv));
 };
 
 
@@ -76,7 +83,7 @@ class TaskCmd: public ClassTaskCreate
 public:
     void setup() override
 	{
-	Cmd.init(256, 1);
+	Cmd.init(32, 1);
 	}
     void loop() override
 	{
@@ -84,4 +91,5 @@ public:
 	}
     };
 extern TaskCmd taskCmd;
+
 #endif /* CMDKEEN_HPP_ */
