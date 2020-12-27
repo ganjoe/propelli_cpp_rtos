@@ -12,6 +12,10 @@
 #include "queue.h"
 #include "usart.h"
 #include "cpp_TaskLink.hpp"
+#include "commands.hpp"
+
+
+static int callback_write = 0;
 
  enum
 {
@@ -20,21 +24,50 @@
     PARSE,
 };
 
+enum
+{
+    CMD_VALID,
+    CMD_ARGCOUNT,
+    CMD_ARGRANGE,
+};
+#define CALLBACK_LEN 40
+#define CMD_MAXARG 4
+
+ typedef struct
+ 	{
+ 	const char *command;
+ 	const char *help;
+ 	const char *arg_names;
+ 	void (*cbf)(int argc, const char **argv);
+ 	}
+ TD_TERMINAL_CALLBACKS;
+
+static TD_TERMINAL_CALLBACKS callbacks[CALLBACK_LEN];
+
+
 class ClassCmdTerminal
     {
 public:
 
    void init(uint32_t len, uint32_t size);
-   void addKey(uint8_t pData);
-   void printQueue(int mode);
+   void addKeyIsr(uint8_t pData);
+   void ReadQueue(int mode);
+   void RegisterCommand();
+   int parseCommand(uint8_t* CmdStrin);
+
+
    void loop();
+   int newKey;
 
 private:
 
    QueueHandle_t CmdRxBufferHndl;
-
-
+   void term_lol_setCallback(const char *command,
+			     const char *help,
+			     const char *arg_names,
+			     void (*cbf)(int argc, const char **argv));
 };
+
 
 extern ClassCmdTerminal Cmd;
 
