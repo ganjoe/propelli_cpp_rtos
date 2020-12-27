@@ -12,15 +12,15 @@
 #include "main.h"
 #include "string.h"
 
-
-
-
 void reset(int argc, const char **argv)
     {
     if (argc == 2)
 	{
 	int i =315;
-	Cmd.pprint("\rcmd reset ok %d\r", i);
+	static char printbuffer[64];
+	snprintf(printbuffer, 64, "\rcmd reset ok %d\r", i);
+	HAL_UART_Transmit(&huart1, (uint8_t*)printbuffer, strlen(printbuffer), 199);
+	//Cmd.pprint("\rcmd reset ok %d\r", i);
 	//HAL_NVIC_SystemReset();
 	}
     }

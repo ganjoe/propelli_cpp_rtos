@@ -6,10 +6,13 @@
  */
 
 #include "CmdKeen.hpp"
+#include "utils.h"
 #include "usart.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+
+
 
 void ClassCmdTerminal::ReadQueue(int mode)
     {
@@ -20,7 +23,7 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	uint8_t lReceivedValue;
 	while (ItemsLeft)
 	    {
-	    xQueueReceive(CmdRxBufferHndl, &lReceivedValue, 1);
+	    xQueueReceive(CmdRxBufferHndl, &lReceivedValue, 0);
 	    HAL_UART_Transmit(&huart1, &lReceivedValue, 1, 190);
 	    ItemsLeft = uxQueueMessagesWaiting(CmdRxBufferHndl);
 
@@ -36,22 +39,22 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	lReceivedBytes = new uint8_t(ItemsLeft);
 	for (int var = 0; var < ItemsLeft; ++var)
 	    {
-	    xQueueReceive(CmdRxBufferHndl, &lReceivedValue, 1);
+	    xQueueReceive(CmdRxBufferHndl, &lReceivedValue, 0);
 	    lReceivedBytes[var] = lReceivedValue;
 	    }
 	HAL_UART_Transmit(&huart1, lReceivedBytes, ItemsLeft, 199);
 
 	for (int var = 0; var < ItemsLeft; ++var)
 	    {
-	    xQueueSendToBack(CmdRxBufferHndl, &lReceivedBytes[var], 1);
+	    xQueueSendToBack(CmdRxBufferHndl, &lReceivedBytes[var], 0);
 	    }
 	delete (lReceivedBytes);
 	}
     //----------------------------------
-    //make shure there is some terminatet string in queue
-    if ((mode == PARSE) & newKey)
+    //make shure there is some terminated string in queue
+    if ((mode == PARSE))
 	{
-	int ItemsLeft = uxQueueMessagesWaiting(CmdRxBufferHndl);
+	uint8_t ItemsLeft = uxQueueMessagesWaitingFromISR(CmdRxBufferHndl);
 	uint8_t lReceivedValue;
 	uint8_t *peekBuffer;
 	//adding \0
@@ -60,7 +63,7 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	for (int var = 0; var < ItemsLeft; ++var)
 	    {
 	    //pop last item
-	    xQueueReceive(CmdRxBufferHndl, &lReceivedValue, 1);
+	    xQueueReceiveFromISR(CmdRxBufferHndl, &lReceivedValue, 0);
 
 	    //copy to temp buffer
 	    peekBuffer[var] = lReceivedValue;
@@ -75,72 +78,108 @@ void ClassCmdTerminal::ReadQueue(int mode)
 		if (parseCommand(peekBuffer) == CMD_VALID)
 		    {
 		    //valid command found
-		   // pprint("[CMDKEEN][PARSE] valid Command %s",peekBuffer);
+		    // pprint("[CMDKEEN][PARSE] valid Command %s",peekBuffer);
 		    //"[CMDKEEN][PARSE] valid Command %s", peekBuffer"
 		    }
+
 		//no further bytes are processed in queue
 		break;
 		}
 	    }
-	newKey = false;
+
 	delete (peekBuffer);
 	}
+    if ((mode == PARSEUART))
+  	{
+	if(newCmd)
+	    {
+	    uint8_t lReceivedValue;
+  	    uint8_t *peekBuffer;
+	    int ItemsLeft = uxQueueMessagesWaitingFromISR(CmdRxBufferHndl);
+	    utils_truncate_number_int(&ItemsLeft, 0, CMD_MAXSTRG);
+	    if(ItemsLeft)
+		{
+		uint8_t peekBuffer[32];
+		for (int var = 0; var < CMD_MAXSTRG; ++var)
+		    {
+		    //pop last item
+		    xQueueReceiveFromISR(CmdRxBufferHndl, &lReceivedValue, 0);
+		    //copy to temp buffer
+		    peekBuffer[var] = lReceivedValue;
+		    //check for carriage return
+	      	    if (lReceivedValue == 13)	//carriage return, \r
+	      		{
+	      		//adding string terminator
+	      		memcpy((char*) peekBuffer + var, "\0", 1);
+	      		//compare strings with registered callback-names
+	      		if (parseCommand(peekBuffer) == CMD_VALID)
+	      		    {
+	      		    //valid command found
+	      		    // pprint("[CMDKEEN][PARSE] valid Command %s",peekBuffer);
+	      		    //"[CMDKEEN][PARSE] valid Command %s", peekBuffer"
+	      		    }
+	      		//no further bytes are processed in queue
+	      		break;
+	      		}
+		    }
+
+		}
+	    }
+
+  	}
 
     }
 
 void ClassCmdTerminal::init(uint32_t len, uint32_t size)
     {
-
     CmdRxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )size);
     CmdTxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )size);
-     RegisterCommand();
+
+    RegisterCommand();
 
     }
 
 void ClassCmdTerminal::term_lol_vprint(const char *fmt, va_list argp)
     {
-        char* string = new char(128);
-        if(0 < vsprintf(string,fmt,argp)) // build string
-        {
-            HAL_UART_Transmit(&huart1, (uint8_t*)string, strlen(string), 0xffffff); // send message via UART
-        }
-        delete(string);
+    char string[32];
+    if (0 < vsprintf(string, fmt, argp)) // build string
+	{
+	HAL_UART_Transmit(&huart1, (uint8_t*) string, strlen(string), 0xffffff); // send message via UART
+	}
+
     }
 
 void ClassCmdTerminal::pprint(const char *fmt, ...) // custom printf() function
     {
-        va_list argp;
-        va_start(argp, fmt);
-        term_lol_vprint(fmt, argp);
-        va_end(argp);
+    va_list argp;
+    va_start(argp, fmt);
+    term_lol_vprint(fmt, argp);
+    va_end(argp);
     }
 
 void ClassCmdTerminal::loop()
     {
-    ReadQueue(PARSE);
+    //HAL_UART_Receive_IT(&huart1, (uint8_t*)1, 1);
+    ReadQueue(PARSEUART);
+    osDelay(10);
     //SendQueue(int len);
     }
 
-
-void ClassCmdTerminal::addKeyIsr(uint8_t pData)
+void ClassCmdTerminal::addByte(uint8_t pData)
     {
     BaseType_t *flag, xStatus;
 
-    xStatus = xQueueSendToBackFromISR(CmdRxBufferHndl, &pData, flag);
-    if (xStatus != pdPASS)
-	{
-	// vPrintString( "Could not send to the queue.\r\n" );
-	}
-    if (pData == 13)
-	{
-	newKey = true;
-	}
-    HAL_UART_Receive_IT(&huart1, &pData, sizeof(char));
+     xStatus = xQueueSendToBackFromISR(CmdRxBufferHndl, &pData, flag);
+     if (xStatus != pdPASS)
+    	{
+    	// vPrintString( "Could not send to the queue.\r\n" );
+    	}
+     HAL_UART_Receive_IT(&huart1, &pData, sizeof(char));
     }
 
 void ClassCmdTerminal::RegisterCommand()
     {
-   	/* term_lol_setCallback("setword", "mcp regs A und B mit wort setzen",	"dword",	setword);
+    /* term_lol_setCallback("setword", "mcp regs A und B mit wort setzen",	"dword",	setword);
      term_lol_setCallback("writepin", "pin, state",		"bits ab port a setzen",	writepin);
      term_lol_setCallback("readpin", "register lesen",	    "pinnr, pullupstate", 	readpin);
      term_lol_setCallback("setallin", "help",    "arghelp", 	setallin);
@@ -167,7 +206,7 @@ void ClassCmdTerminal::RegisterCommand()
      term_lol_setCallback("trange","Heizung Temperaturschwellen","lowlimit<float>_highlimit<float>", 	trange);
 
      term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
-    term_lol_setCallback("selhhw", 	"help",		"arghelp", 	selhhw);*/
+     term_lol_setCallback("selhhw", 	"help",		"arghelp", 	selhhw);*/
     term_lol_setCallback("reset", "Backup und Reset", "kein Argument", reset);
     }
 
@@ -258,7 +297,19 @@ void ClassCmdTerminal::term_lol_setCallback(const char *command,
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
-    Cmd.addKeyIsr((uint8_t) huart1.Instance->DR);
+    //
+    BaseType_t xStatus, *flag;
+
+    uint8_t pData = huart1.Instance->DR;
+
+	if (pData == (uint8_t) 13)
+	    {
+	    Cmd.newCmd++;
+	    }
+	Cmd.addByte((uint8_t)huart1.Instance->DR);
+
+
+
     }
 //using namespace cpp_freertos;
 
