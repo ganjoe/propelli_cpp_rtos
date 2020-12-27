@@ -7,9 +7,9 @@
 
 #include "CmdKeen.hpp"
 #include "usart.h"
-#include "stdlib.h"
-#include "string.h"
-#include "stdarg.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <string.h>
 
 void ClassCmdTerminal::ReadQueue(int mode)
     {
@@ -97,32 +97,23 @@ void ClassCmdTerminal::init(uint32_t len, uint32_t size)
 
     }
 
-void ClassCmdTerminal::term_lol_vprint(const char *fmt, va_list argp,  char* buffer)
+void ClassCmdTerminal::term_lol_vprint(const char *fmt, va_list argp)
     {
-	HAL_StatusTypeDef stat;
-	int txlen;
-
-	if (0 < vsprintf(buffer, fmt, argp))
-	    {
-	    txlen = strlen(buffer);
-		for (int var = 0; var < txlen; ++var)
-		    {
-		    //wait 100ms at full queue to become available
-		   // xQueueSendToBack(CmdTxBufferHndl, &buffer[var], 0);
-		    }
-	    }
-
+        char* string = new char(128);
+        if(0 < vsprintf(string,fmt,argp)) // build string
+        {
+            HAL_UART_Transmit(&huart1, (uint8_t*)string, strlen(string), 0xffffff); // send message via UART
+        }
+        delete(string);
     }
 
-void ClassCmdTerminal::pprint(const char *fmt, ...)
-       {
-    char buffer[32];
-    va_list argp;
-    va_start(argp, fmt);
-    term_lol_vprint(fmt, argp, buffer);
-    va_end(argp);
-
-       }
+void ClassCmdTerminal::pprint(const char *fmt, ...) // custom printf() function
+    {
+        va_list argp;
+        va_start(argp, fmt);
+        term_lol_vprint(fmt, argp);
+        va_end(argp);
+    }
 
 void ClassCmdTerminal::loop()
     {

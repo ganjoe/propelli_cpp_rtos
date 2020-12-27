@@ -71,7 +71,7 @@ private:
 
    QueueHandle_t CmdRxBufferHndl, CmdTxBufferHndl;
 
-   void term_lol_vprint(const char *fmt, va_list argp,  char* buffer);
+  void term_lol_vprint(const char *fmt, va_list argp);
   void term_lol_setCallback(const char *command,const char *help,const char *arg_names, void (*cbf)(int argc, const char **argv));
 };
 

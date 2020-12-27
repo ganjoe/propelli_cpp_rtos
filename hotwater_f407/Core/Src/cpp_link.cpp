@@ -18,15 +18,15 @@
     #endif
     	void cpp_init(void)
     	    {
-    	 uint8_t* pData;
-    	  HAL_UART_Receive_DMA(&huart1, pData, 1);
+    	    uint8_t* pData;
+    	    HAL_UART_Receive_DMA(&huart1, pData, 1);
     	    taskMcp.setup();
     	    taskCmd.setup();
 
     	    taskLedGreen.start("BlinkGreen", 128, 2);
     	    taskLedRed.start("BlinkRed", 128, 2);
     	    taskMcp.start("mcp_io", 128, 1);
-    	    taskCmd.start("TermGetKey", 128, 1);
+    	    taskCmd.start("TermGetKey", 256, 1);
 
     	    }
 

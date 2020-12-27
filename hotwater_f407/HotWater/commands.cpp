@@ -19,8 +19,8 @@ void reset(int argc, const char **argv)
     {
     if (argc == 2)
 	{
-	float f =3.1415;
-	//Cmd.pprint("\rcmd reset ok:%5fs ok\r", f);
+	int i =315;
+	Cmd.pprint("\rcmd reset ok %d\r", i);
 	//HAL_NVIC_SystemReset();
 	}
     }

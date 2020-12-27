@@ -28,7 +28,7 @@ public:
        void loop() override
 	{
 	BoardLed.toggleRed();
-	osDelay(200);
+	osDelay(20);
 	}
 };
 
@@ -39,7 +39,7 @@ public:
        void loop() override
 	{
 	BoardLed.toggleGreen();
-	osDelay(500);
+	osDelay(50);
 	}
 };
 
