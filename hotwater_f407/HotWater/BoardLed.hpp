@@ -28,7 +28,7 @@ public:
        void loop() override
 	{
 	BoardLed.toggleRed();
-	osDelay(20);
+	osDelay(200);
 	}
 };
 
@@ -38,8 +38,8 @@ class TaskLedGreen: public ClassTaskCreate
 public:
        void loop() override
 	{
-	BoardLed.toggleGreen();
-	osDelay(50);
+	//BoardLed.toggleGreen();
+	osDelay(500);
 	}
 };
 

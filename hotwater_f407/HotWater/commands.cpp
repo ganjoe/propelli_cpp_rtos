@@ -11,15 +11,17 @@
 #include "stdio.h"
 #include "main.h"
 #include "string.h"
+#include "BoardLed.hpp"
 
 void reset(int argc, const char **argv)
     {
     if (argc == 2)
 	{
 	int i =315;
-	static char printbuffer[64];
-	snprintf(printbuffer, 64, "\rcmd reset ok %d\r", i);
-	HAL_UART_Transmit(&huart1, (uint8_t*)printbuffer, strlen(printbuffer), 199);
+	//static char printbuffer[64];
+	//snprintf(printbuffer, 64, "\rcmd reset ok %d\r", i);
+	BoardLed.toggleGreen();
+	//HAL_UART_Transmit(&huart1, (uint8_t*)printbuffer, strlen(printbuffer), 199);
 	//Cmd.pprint("\rcmd reset ok %d\r", i);
 	//HAL_NVIC_SystemReset();
 	}

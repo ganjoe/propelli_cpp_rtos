@@ -94,12 +94,12 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	if(newCmd)
 	    {
 	    uint8_t lReceivedValue;
-  	    uint8_t *peekBuffer;
+
 	    int ItemsLeft = uxQueueMessagesWaitingFromISR(CmdRxBufferHndl);
 	    utils_truncate_number_int(&ItemsLeft, 0, CMD_MAXSTRG);
 	    if(ItemsLeft)
 		{
-		uint8_t peekBuffer[32];
+		uint8_t peekBuffer[CMD_MAXSTRG];
 		for (int var = 0; var < CMD_MAXSTRG; ++var)
 		    {
 		    //pop last item
@@ -122,12 +122,11 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	      		break;
 	      		}
 		    }
-
 		}
+	    newCmd--;
+	    HAL_UART_Receive_IT(&huart1, &pData, sizeof(char));
 	    }
-
   	}
-
     }
 
 void ClassCmdTerminal::init(uint32_t len, uint32_t size)
@@ -161,7 +160,8 @@ void ClassCmdTerminal::loop()
     {
     //HAL_UART_Receive_IT(&huart1, (uint8_t*)1, 1);
     ReadQueue(PARSEUART);
-    osDelay(10);
+    HAL_UART_Receive_DMA(&huart1, &pData, sizeof(char));
+    //osDelay(10);
     //SendQueue(int len);
     }
 
@@ -174,7 +174,7 @@ void ClassCmdTerminal::addByte(uint8_t pData)
     	{
     	// vPrintString( "Could not send to the queue.\r\n" );
     	}
-     HAL_UART_Receive_IT(&huart1, &pData, sizeof(char));
+     HAL_UART_Receive_DMA(&huart1, &pData, sizeof(char));
     }
 
 void ClassCmdTerminal::RegisterCommand()
@@ -297,7 +297,6 @@ void ClassCmdTerminal::term_lol_setCallback(const char *command,
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
-    //
     BaseType_t xStatus, *flag;
 
     uint8_t pData = huart1.Instance->DR;
@@ -307,11 +306,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	    Cmd.newCmd++;
 	    }
 	Cmd.addByte((uint8_t)huart1.Instance->DR);
-
-
-
     }
-//using namespace cpp_freertos;
 
 ClassCmdTerminal Cmd;
 TaskCmd taskCmd;
