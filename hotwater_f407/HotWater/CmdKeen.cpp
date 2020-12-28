@@ -17,7 +17,7 @@
 void ClassCmdTerminal::ReadQueue(int mode)
     {
     //----------------------------------
-    if (mode == POP)
+   /*   if (mode == POP)
 	{
 	int ItemsLeft = uxQueueMessagesWaiting(CmdRxBufferHndl);
 	uint8_t lReceivedValue;
@@ -29,7 +29,7 @@ void ClassCmdTerminal::ReadQueue(int mode)
 
 	    }
 	}
-    //----------------------------------
+  //----------------------------------
     if (mode == PEEK)
 	{
 	int ItemsLeft = uxQueueMessagesWaiting(CmdRxBufferHndl);
@@ -89,9 +89,10 @@ void ClassCmdTerminal::ReadQueue(int mode)
 
 	delete (peekBuffer);
 	}
+	*/
     if ((mode == PARSEUART))
   	{
-	if(newCmd)
+	if(newCmdCnt)
 	    {
 	    uint8_t lReceivedValue;
 
@@ -99,7 +100,8 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	    utils_truncate_number_int(&ItemsLeft, 0, CMD_MAXSTRG);
 	    if(ItemsLeft)
 		{
-		uint8_t peekBuffer[CMD_MAXSTRG];
+		uint8_t* peekBuffer = (uint8_t*)pvPortMalloc(CMD_MAXSTRG);
+		//uint8_t peekBuffer[CMD_MAXSTRG];
 		for (int var = 0; var < CMD_MAXSTRG; ++var)
 		    {
 		    //pop last item
@@ -114,16 +116,16 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	      		//compare strings with registered callback-names
 	      		if (parseCommand(peekBuffer) == CMD_VALID)
 	      		    {
-	      		    //valid command found
-	      		    // pprint("[CMDKEEN][PARSE] valid Command %s",peekBuffer);
-	      		    //"[CMDKEEN][PARSE] valid Command %s", peekBuffer"
+	      		     pprint("\r[CMDKEEN][PARSE] valid Command %s",var);
 	      		    }
 	      		//no further bytes are processed in queue
 	      		break;
 	      		}
 		    }
+		vPortFree(peekBuffer);
+		//free(peekBuffer);
 		}
-	    newCmd--;
+	    newCmdCnt--;
 	    HAL_UART_Receive_IT(&huart1, &pData, sizeof(char));
 	    }
   	}
@@ -140,12 +142,18 @@ void ClassCmdTerminal::init(uint32_t len, uint32_t size)
 
 void ClassCmdTerminal::term_lol_vprint(const char *fmt, va_list argp)
     {
-    char string[32];
-    if (0 < vsprintf(string, fmt, argp)) // build string
-	{
-	HAL_UART_Transmit(&huart1, (uint8_t*) string, strlen(string), 0xffffff); // send message via UART
-	}
+    char pbuffer[CMD_PRINTBUFFER];
+    uint8_t bytesWrote;
 
+    bytesWrote = snprintf(pbuffer, CMD_PRINTBUFFER, fmt);
+
+    if (bytesWrote>=0 && bytesWrote < CMD_PRINTBUFFER)
+	{
+	for (int var = 0; var < bytesWrote; ++var)
+	    {
+	    xQueueSendToBack(CmdTxBufferHndl,	&pbuffer[var], 0);
+	    }
+	}
     }
 
 void ClassCmdTerminal::pprint(const char *fmt, ...) // custom printf() function
@@ -158,16 +166,15 @@ void ClassCmdTerminal::pprint(const char *fmt, ...) // custom printf() function
 
 void ClassCmdTerminal::loop()
     {
-    //HAL_UART_Receive_IT(&huart1, (uint8_t*)1, 1);
     ReadQueue(PARSEUART);
     HAL_UART_Receive_DMA(&huart1, &pData, sizeof(char));
-    //osDelay(10);
-    //SendQueue(int len);
+    SendQueue();
     }
 
-void ClassCmdTerminal::addByte(uint8_t pData)
+void ClassCmdTerminal::addByteFromISR(uint8_t pData)
     {
-    BaseType_t *flag, xStatus;
+    BaseType_t *flag = 0;
+    BaseType_t xStatus;
 
      xStatus = xQueueSendToBackFromISR(CmdRxBufferHndl, &pData, flag);
      if (xStatus != pdPASS)
@@ -251,7 +258,16 @@ int ClassCmdTerminal::parseCommand(uint8_t *CmdString)
 	    return CMD_VALID;
 	    }
 	}
+    return 0;
+    }
 
+void ClassCmdTerminal::SendQueue()
+    {
+    uint8_t lReceivedValue;
+    xQueueReceive(CmdTxBufferHndl, &lReceivedValue, 0);
+    int ItemsLeft = uxQueueMessagesWaitingFromISR(CmdTxBufferHndl);
+    if(ItemsLeft)
+	HAL_UART_Transmit(&huart1, &lReceivedValue, 1, 190);
     }
 
 void ClassCmdTerminal::term_lol_setCallback(const char *command,
@@ -297,15 +313,13 @@ void ClassCmdTerminal::term_lol_setCallback(const char *command,
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
     {
-    BaseType_t xStatus, *flag;
-
     uint8_t pData = huart1.Instance->DR;
 
 	if (pData == (uint8_t) 13)
 	    {
-	    Cmd.newCmd++;
+	    Cmd.newCmdCnt++;
 	    }
-	Cmd.addByte((uint8_t)huart1.Instance->DR);
+	Cmd.addByteFromISR((uint8_t)huart1.Instance->DR);
     }
 
 ClassCmdTerminal Cmd;

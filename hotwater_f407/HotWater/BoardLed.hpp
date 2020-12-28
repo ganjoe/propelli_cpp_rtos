@@ -9,6 +9,7 @@
 #ifndef INC_BOARDLED_HPP_
 #define INC_BOARDLED_HPP_
 #include "cpp_TaskLink.hpp"
+#include "CmdKeen.hpp"
 
 
 
@@ -28,6 +29,7 @@ public:
        void loop() override
 	{
 	BoardLed.toggleRed();
+
 	osDelay(200);
 	}
 };
@@ -38,7 +40,7 @@ class TaskLedGreen: public ClassTaskCreate
 public:
        void loop() override
 	{
-	//BoardLed.toggleGreen();
+	BoardLed.toggleGreen();
 	osDelay(500);
 	}
 };

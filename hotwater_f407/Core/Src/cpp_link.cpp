@@ -16,11 +16,9 @@
     #endif
     	void cpp_init(void)
     	    {
-    	    uint8_t* dData;
-
     	    taskMcp.setup();
     	    taskCmd.setup();
-    	   uint8_t* pData;
+    	    uint8_t* pData=0;
   	    HAL_UART_Receive_DMA(&huart1, pData, 1);
     	    taskLedGreen.start("BlinkGreen", 128, 2);
     	    taskLedRed.start("BlinkRed", 128, 2);
