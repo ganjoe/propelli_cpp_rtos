@@ -8,4 +8,4 @@
 #include "TaskPrettyPrint.h"
 
 
-TaskPrettyPrint taskPrettyPrint;
+TaskPrettyPrint taskPP;

@@ -32,6 +32,10 @@ DBRETURN;
 class PrettyPrint
     {
     public:
+
+    //baseclass implementation
+    void setup();
+    void loop();
     /*----------*/
    int storeItem(float item, 	DBKEYS name);
    int storeItem(int32_t item, 	DBKEYS name);
@@ -58,20 +62,19 @@ class PrettyPrint
     private:
     };
 
-
 class TaskPrettyPrint: public ClassTaskCreate
     {
     public:
 	void setup() override
 	{
-
+	setup();
 	}
 	void loop() override
 	{
-
+	loop();
 	}
     };
 
-extern TaskPrettyPrint taskPrettyPrint;
+extern TaskPrettyPrint taskPP;
 
 #endif /* TASKPRETTYPRINT_H_ */

@@ -176,8 +176,12 @@ void ClassCmdTerminal::addByteFromISR(uint8_t pData)
     BaseType_t *flag = 0;
     BaseType_t xStatus;
 
-     xStatus = xQueueSendToBackFromISR(CmdRxBufferHndl, &pData, flag);
-     if (xStatus != pdPASS)
+     xStatus = xQueueSendToBackFromISR(CmdRxBufferHndl, &pData, 0);
+     if (xStatus == pdPASS)
+    	{
+    	// vPrintString( "Could not send to the queue.\r\n" );
+    	}
+     if (xStatus == errQUEUE_BLOCKED)
     	{
     	// vPrintString( "Could not send to the queue.\r\n" );
     	}
@@ -263,6 +267,7 @@ int ClassCmdTerminal::parseCommand(uint8_t *CmdString)
 
 void ClassCmdTerminal::SendQueue()
     {
+    //sending single byte every taskloop
     uint8_t lReceivedValue;
     xQueueReceive(CmdTxBufferHndl, &lReceivedValue, 0);
     int ItemsLeft = uxQueueMessagesWaitingFromISR(CmdTxBufferHndl);
