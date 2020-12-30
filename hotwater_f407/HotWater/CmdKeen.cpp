@@ -7,7 +7,8 @@
 
 #include "CmdKeen.hpp"
 #include "utils.h"
-#include "usart.h"
+#include "TaskUartSend.hpp"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -116,7 +117,7 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	      		//compare strings with registered callback-names
 	      		if (parseCommand(peekBuffer) == CMD_VALID)
 	      		    {
-	      		     pprint("\r[CMDKEEN][PARSE] valid Command %s",var);
+	      		     Usend.print("\r[CMDKEEN][PARSE] valid Command %s",var);
 	      		    }
 	      		//no further bytes are processed in queue
 	      		break;
@@ -134,7 +135,6 @@ void ClassCmdTerminal::ReadQueue(int mode)
 void ClassCmdTerminal::init(uint32_t len, uint32_t size)
     {
     CmdRxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )size);
-    CmdTxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )size);
 
     RegisterCommand();
 
@@ -168,7 +168,7 @@ void ClassCmdTerminal::loop()
     {
     ReadQueue(PARSEUART);
     HAL_UART_Receive_DMA(&huart1, &pData, sizeof(char));
-    SendQueue();
+
     }
 
 void ClassCmdTerminal::addByteFromISR(uint8_t pData)
@@ -291,7 +291,9 @@ void ClassCmdTerminal::SendQueue()
     xQueueReceive(CmdTxBufferHndl, &lReceivedValue, 0);
     int ItemsLeft = uxQueueMessagesWaitingFromISR(CmdTxBufferHndl);
     if(ItemsLeft)
-	HAL_UART_Transmit(&huart1, &lReceivedValue, 1, 190);
+	{
+	//HAL_UART_Transmit(&huart1, &lReceivedValue, 1, 190);
+	}
     }
 
 void ClassCmdTerminal::term_lol_setCallback(const char *command,

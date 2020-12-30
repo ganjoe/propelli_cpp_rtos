@@ -18,7 +18,7 @@
 #define UART_SENDBUFFER 128
 
 //n items are send at once every taskloop
-#define UART_PRINTLOOP 8
+#define UART_PRINTLOOP 3
 
 //array size for snprintf
 #define UART_PRINTBUFFER 32
@@ -82,6 +82,7 @@ public:
 	//osDelay(transmissionTime);
 	}
     };
+
 extern TaskUsend taskUsend;
 
 #endif /* TASKUARTSEND_HPP_ */

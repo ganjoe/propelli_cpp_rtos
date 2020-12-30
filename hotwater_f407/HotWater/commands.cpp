@@ -12,6 +12,7 @@
 #include "main.h"
 #include "string.h"
 #include "BoardLed.hpp"
+#include "TaskUartSend.hpp"
 
 static int callback_write = 0;
 
@@ -22,9 +23,7 @@ void reset(int argc, const char **argv)
 	{
 	int i =315;
 
-	BoardLed.toggleGreen();
-
-	Cmd.pprint("\rcmd reset ok %d\r", i);
+	Usend.print("\rcmd reset ok %d\r", i);
 	//HAL_NVIC_SystemReset();
 	}
     }

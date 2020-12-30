@@ -9,6 +9,7 @@
 #include "stdarg.h"
 #include "utils.h"
 #include "string.h"
+#include "stdlib.h"
 
 void ClassUartSend::addString( void *String )
     {
@@ -17,13 +18,14 @@ void ClassUartSend::addString( void *String )
 
 void ClassUartSend::init(uint32_t len, uint32_t sendatonce )
     {
-    CmdTxBufferHndl = xQueueCreate( len, sizeof( char * ) );
+    CmdTxBufferHndl = xQueueCreate((UBaseType_t )len, (UBaseType_t )1);
     this->sendatonce = sendatonce;
     }
 
 void ClassUartSend::loop()
     {
     SendQueue();
+    osDelay(100);
 
     }
 
@@ -31,9 +33,7 @@ void ClassUartSend::SendQueue()
     {
     if ( ! transmissionFlag)
 	{
-	uint8_t popedByte;
 	int ItemsLeft;
-
 
 	ItemsLeft = uxQueueMessagesWaiting( CmdTxBufferHndl );
 
@@ -43,23 +43,25 @@ void ClassUartSend::SendQueue()
 	    utils_truncate_number_int( &ItemsLeft, 0, sendatonce );
 
 	    //pvPortMalloc assumes unsigned int as size. the buffersize is truncated by sendatonce value
-	    dmaBuff = ( uint8_t* )pvPortMalloc( ItemsLeft / 2 );
+	    uint8_t dmaBuff[ItemsLeft];
 
 	    //copy bytes that are send at once to temp buffer
 	    for ( int var = 0; var < ItemsLeft; ++var )
 		{
-		//should receive from front
-		xQueueReceive( CmdTxBufferHndl, &popedByte, 0 );
 
-		dmaBuff[ var ] = popedByte;
+		//should receive from front
+		  uint8_t lReceivedValue;
+		  xQueueReceive(CmdTxBufferHndl, &lReceivedValue, 0);
+
+		dmaBuff[ var ] = lReceivedValue;
 		}
 
 		//transmission time[s]: 10 bit / n baud
 		Usend.transmissionFlag = true;
-		HAL_UART_Transmit_DMA( &huart1, dmaBuff, ItemsLeft );
+		HAL_UART_Transmit_DMA( &huart1, dmaBuff, sendatonce );
 
 	    //TODO: consider allocating once and didn't free
-	    vPortFree( dmaBuff );
+
 	    }
 	}
     }
@@ -86,14 +88,15 @@ void ClassUartSend::print(const char *fmt, ...)
     va_start(argp, fmt);
     char pbuffer[UART_PRINTBUFFER];
     uint8_t bytesWrote;
+    BaseType_t xStatus;
 
     bytesWrote = snprintf(pbuffer, UART_PRINTBUFFER, fmt);
 
-    if (bytesWrote>=0 && bytesWrote < UART_PRINTBUFFER)
+    if (bytesWrote>=0)
 	{
 	for (int var = 0; var < bytesWrote; ++var)
 	    {
-	    xQueueSendToBack(CmdTxBufferHndl,	&pbuffer[var], portMAX_DELAY);
+	    xStatus = xQueueSendToBack(CmdTxBufferHndl,	&pbuffer[var], portMAX_DELAY);
 	    }
 	}
     va_end(argp);
