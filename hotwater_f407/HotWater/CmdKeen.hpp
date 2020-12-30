@@ -44,9 +44,11 @@ enum
 //array size for snprintf
 #define CMD_PRINTBUFFER 32
 
+//TODO:obsolet
 //n items are send at once every taskloop
 #define CMD_PRINTLOOP 8
 
+//TODO:obsolet
 //queue size for all sprintf-strings, that are not send yet
 #define CMD_SENDBUFFER 128
 

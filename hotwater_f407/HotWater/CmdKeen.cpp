@@ -189,7 +189,7 @@ void ClassCmdTerminal::addByteFromISR(uint8_t pData)
      HAL_UART_Receive_DMA(&huart1, &pData, sizeof(char));
     }
 
-void ClassCmdTerminal::addByte(uint8_t pData, )
+void ClassCmdTerminal::addByte(uint8_t pData )
     {
     BaseType_t *flag = 0;
      BaseType_t xStatus;
