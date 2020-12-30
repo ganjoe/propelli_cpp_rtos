@@ -20,6 +20,9 @@
 //n items are send at once every taskloop
 #define UART_PRINTLOOP 8
 
+//array size for snprintf
+#define UART_PRINTBUFFER 32
+
 /* Gatekeepertask for UartAccess. Prints out n Bytes from Queuebuffer every loop.
  * therfore, dma can be used
  * strings are copied when passed as pointers.
@@ -29,17 +32,30 @@ class ClassUartSend
 public:
     // virtual function implementation
    void init(uint32_t len,  uint32_t sendatonce);
+
    void loop();
-   //interface
-   void SendQueue();
+
+   //write bytes
+   void write(uint8_t* buffer);
+
+   //write formatted string
+   void print(const char *fmt, ...);
+
+   //time for dma transfer to complete in us
+   uint16_t transmissionFlag;
+
+
 
 private:
+
+   //called by loop
+   void SendQueue();
 
    //nr of bytes that are send at once
    uint8_t sendatonce;
 
-   //maybe dma needs static adress for continuing transfer after the task has be left
-   static uint8_t* dmaBuff;
+   //maybe dma needs persistent address for continuing transfer after the task has be left
+   uint8_t* dmaBuff;
 
    //FreeRTOS Queues
     QueueHandle_t CmdTxBufferHndl;
@@ -57,11 +73,13 @@ class TaskUsend: public ClassTaskCreate
 public:
     void setup() override
 	{
-	Usend.init(UART_SENDBUFFER, UART_PRINTLOOP);
+	Usend.init( UART_SENDBUFFER, UART_PRINTLOOP );
 	}
     void loop() override
 	{
 	Usend.loop();
+	//utils_get_uart_tx_time(uint32_t baud,
+	//osDelay(transmissionTime);
 	}
     };
 extern TaskUsend taskUsend;

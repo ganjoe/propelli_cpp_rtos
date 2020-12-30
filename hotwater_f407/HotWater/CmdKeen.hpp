@@ -42,6 +42,7 @@ enum
 #define CMD_MAXARG 4
 
 //array size for snprintf
+//TODO:obsolet
 #define CMD_PRINTBUFFER 32
 
 //TODO:obsolet
