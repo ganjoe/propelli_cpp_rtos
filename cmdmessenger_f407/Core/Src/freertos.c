@@ -23,7 +23,7 @@
 #include "task.h"
 #include "main.h"
 #include "cmsis_os.h"
-
+//#include "cpp_link.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -229,6 +229,7 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+
     osDelay(1);
   }
   /* USER CODE END StartDefaultTask */
