@@ -25,7 +25,7 @@ void ClassUartSend::init(uint32_t len, uint32_t sendatonce )
 void ClassUartSend::loop()
     {
     SendQueue();
-    osDelay(100);
+    osDelay(5);
 
     }
 
@@ -58,7 +58,8 @@ void ClassUartSend::SendQueue()
 
 		//transmission time[s]: 10 bit / n baud
 		Usend.transmissionFlag = true;
-		HAL_UART_Transmit_DMA( &huart1, dmaBuff, sendatonce );
+		HAL_UART_Transmit( &huart1, dmaBuff, sendatonce, 100 );
+		Usend.transmissionFlag = false;
 
 	    //TODO: consider allocating once and didn't free
 
@@ -82,15 +83,19 @@ void ClassUartSend::write( uint8_t* buffer )
 
     }
 
-void ClassUartSend::print(const char *fmt, ...)
+void ClassUartSend::print(const char * fmt, ...)
     {
-    va_list argp;
-    va_start(argp, fmt);
     char pbuffer[UART_PRINTBUFFER];
-    uint8_t bytesWrote;
+    va_list argp;
+
+    va_start(argp, fmt);
+
+    uint8_t bytesWrote = vsnprintf(pbuffer, UART_PRINTBUFFER, fmt, argp);
+
+    va_end(argp);
+
     BaseType_t xStatus;
 
-    bytesWrote = snprintf(pbuffer, UART_PRINTBUFFER, fmt);
 
     if (bytesWrote>=0)
 	{
@@ -98,8 +103,7 @@ void ClassUartSend::print(const char *fmt, ...)
 	    {
 	    xStatus = xQueueSendToBack(CmdTxBufferHndl,	&pbuffer[var], portMAX_DELAY);
 	    }
-	}
-    va_end(argp);
+	};
     }
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)

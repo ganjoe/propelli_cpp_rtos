@@ -286,18 +286,6 @@ int ClassCmdTerminal::parseCommand(uint8_t *CmdString)
     return 0;
     }
 
-void ClassCmdTerminal::SendQueue()
-    {
-    //sending single byte every taskloop
-    uint8_t lReceivedValue;
-    xQueueReceive(CmdTxBufferHndl, &lReceivedValue, 0);
-    int ItemsLeft = uxQueueMessagesWaitingFromISR(CmdTxBufferHndl);
-    if(ItemsLeft)
-	{
-	//HAL_UART_Transmit(&huart1, &lReceivedValue, 1, 190);
-	}
-    }
-
 void ClassCmdTerminal::term_lol_setCallback(const char *command,
 	const char *help, const char *arg_names,
 	void (*cbf)(int argc, const char **argv))

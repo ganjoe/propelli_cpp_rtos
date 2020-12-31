@@ -10,6 +10,7 @@
 #include "stdio.h"
 #include "main.h"
 #include "string.h"
+#include "iostream"
 #include "BoardLed.hpp"
 #include "TaskUartSend.hpp"
 
@@ -31,11 +32,14 @@ void reset(int argc, const char **argv)
 
 void dbwrval(int argc, const char **argv)
     {
-    float f = -1;
-    if (argc == 2)
+    float key = -1;
+    float value = -1;
+    if (argc == 3)
 	{
 	//scanf(argv[1], "%f", &f);
-	Usend.print("\r[CMDKEEN][PARSE]<dbwrval><%f>",3.14);
+	key = std::stof(argv[1]);
+	value = std::stof(argv[2]);
+	Usend.print("\r[CMDKEEN][PARSE] dbwrval %f %f",key, value);
 
 	//Usend.print("\rdelayed", d);
 	//HAL_NVIC_SystemReset();

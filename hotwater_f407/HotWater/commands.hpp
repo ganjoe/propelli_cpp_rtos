@@ -13,20 +13,12 @@
     	{
     #endif
 
-
-void term_lol_setCallback(const char *command,
-			     const char *help,
-			     const char *arg_names,
-			     void (*cbf)(int argc, const char **argv));
-
-
 //	config
 void reset	(int argc, const char **argv);
 void dbReadVal	(int argc, const char **argv);
 void dbwrval	(int argc, const char **argv);
 void dbReadKey	(int argc, const char **argv);
 void dbWriteKey	(int argc, const char **argv);
-
 void dbFindKey	(int argc, const char **argv);
 
 

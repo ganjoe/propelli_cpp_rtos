@@ -18,10 +18,10 @@
 #define UART_SENDBUFFER 128
 
 //n items are send at once every taskloop
-#define UART_PRINTLOOP 3
+#define UART_PRINTLOOP 1
 
 //array size for snprintf
-#define UART_PRINTBUFFER 32
+#define UART_PRINTBUFFER 64
 
 /* Gatekeepertask for UartAccess. Prints out n Bytes from Queuebuffer every loop.
  * therfore, dma can be used
