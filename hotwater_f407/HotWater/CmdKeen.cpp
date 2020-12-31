@@ -101,7 +101,8 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	    utils_truncate_number_int(&ItemsLeft, 0, CMD_MAXSTRG);
 	    if(ItemsLeft)
 		{
-		uint8_t* peekBuffer = (uint8_t*)pvPortMalloc(CMD_MAXSTRG);
+		//uint8_t* peekBuffer = (uint8_t*)pvPortMalloc(CMD_MAXSTRG);
+		uint8_t peekBuffer [ CMD_MAXSTRG ];
 		//uint8_t peekBuffer[CMD_MAXSTRG];
 		for (int var = 0; var < CMD_MAXSTRG; ++var)
 		    {
@@ -123,7 +124,7 @@ void ClassCmdTerminal::ReadQueue(int mode)
 	      		break;
 	      		}
 		    }
-		vPortFree(peekBuffer);
+		//vPortFree(peekBuffer);
 		//free(peekBuffer);
 		}
 	    newCmdCnt--;
@@ -238,6 +239,7 @@ void ClassCmdTerminal::RegisterCommand()
      term_lol_setCallback("selterm",	"help",		"arghelp", 	selterm);
      term_lol_setCallback("selhhw", 	"help",		"arghelp", 	selhhw);*/
     term_lol_setCallback("reset", "Backup und Reset", "kein Argument", reset);
+    term_lol_setCallback("dbwrval","write at arr position","kein Argument", dbwrval);
     }
 
 int ClassCmdTerminal::parseCommand(uint8_t *CmdString)

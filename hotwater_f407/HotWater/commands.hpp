@@ -8,7 +8,12 @@
 #ifndef COMMANDS_HPP_
 #define COMMANDS_HPP_
 
-void RegisterCommand();
+    #ifdef __cplusplus
+    	extern "C"
+    	{
+    #endif
+
+
 void term_lol_setCallback(const char *command,
 			     const char *help,
 			     const char *arg_names,
@@ -16,7 +21,16 @@ void term_lol_setCallback(const char *command,
 
 
 //	config
-void reset(int argc, const char **argv);
+void reset	(int argc, const char **argv);
+void dbReadVal	(int argc, const char **argv);
+void dbwrval	(int argc, const char **argv);
+void dbReadKey	(int argc, const char **argv);
+void dbWriteKey	(int argc, const char **argv);
+
+void dbFindKey	(int argc, const char **argv);
+
+
+
 /*
 void selterm(int argc, const char **argv);
 void selhhw(int argc, const char **argv);
@@ -44,4 +58,7 @@ void mode(int argc, const char **argv);
 void trange(int argc, const char **argv);
 */
 
+    #ifdef __cplusplus
+    	}
+    #endif
 #endif /* COMMANDS_HPP_ */
